@@ -4,19 +4,57 @@ import 'dart:async';
 import 'dart:convert';
 
 const request = "https://api.hgbrasil.com/finance?format=json&key=d9f91066";
+double dolar, euro;
+final realController = new TextEditingController();
+final dolarController = new TextEditingController();
+final euroController = new TextEditingController();
 void main() async {
-  runApp(MaterialApp(home: Home(),
-  theme: ThemeData(hintColor: Colors.amber,primaryColor: Colors.white),));
+  runApp(MaterialApp(
+    home: Home(),
+    theme: ThemeData(hintColor: Colors.amber, primaryColor: Colors.white),
+  ));
 }
 
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
 }
+void _clearAll(){
+  realController.text = "";
+  dolarController.text = "";
+  euroController.text = "";
+}
+
+void _realChanged(String text){
+  if(text.isEmpty) {
+    _clearAll();
+    return;
+  }
+  double real = double.parse(text);
+  dolarController.text = (real/dolar).toStringAsFixed(2);
+  euroController.text = (real/euro).toStringAsFixed(2);
+}
+void _dolarChanged(String text){
+  if(text.isEmpty) {
+    _clearAll();
+    return;
+  }
+  double dolarDigitado = double.parse(text);
+  realController.text = (dolar * dolarDigitado).toStringAsPrecision(2);
+  euroController.text = ((dolar * dolarDigitado)/euro).toStringAsPrecision(2);
+}
+void _euroChanged(String text){
+  if(text.isEmpty) {
+    _clearAll();
+    return;
+  }
+  double euroDigitado = double.parse(text);
+  realController.text = (euro * euroDigitado).toStringAsPrecision(2);
+  dolarController.text = ((euro * euroDigitado)/dolar).toStringAsPrecision(2);
+}
+
 
 class _HomeState extends State<Home> {
-  double dolar, euro;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,21 +85,20 @@ class _HomeState extends State<Home> {
                   dolar = snapshot.data["results"]["currencies"]["USD"]["buy"];
                   euro = snapshot.data["results"]["currencies"]["EUR"]["buy"];
                   return SingleChildScrollView(
-                    padding: EdgeInsets.all(10.0),
+                      padding: EdgeInsets.all(10.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                        Icon(Icons.monetization_on,
-                            size: 150, color: Colors.amber),
-                        TextField(
-                          decoration: InputDecoration(labelText: "Reais",
-                          labelStyle: TextStyle(color: Colors.amber),
-                          border: OutlineInputBorder(borderSide:  BorderSide(color: Colors.pinkAccent ),),
-                          prefixText: "R\$"),
-                          style: TextStyle(color: Colors.amber, fontSize: 25.0),
-                      )
-                    ],
-                  ));
+                          Icon(Icons.monetization_on,
+                              size: 150, color: Colors.amber),
+                          BuildTextField("Reais", "R\$", context, realController,_realChanged),
+                          Divider(),
+                          BuildTextField("Dólares", "US\$", context, dolarController,_dolarChanged),
+                          Divider(),
+                          BuildTextField("Euros", "€", context, euroController,_euroChanged),
+
+                        ],
+                      ));
                 }
             }
           }),
@@ -72,4 +109,21 @@ class _HomeState extends State<Home> {
 Future<Map> getData() async {
   http.Response response = await http.get(request);
   return json.decode(response.body);
+}
+Widget BuildTextField(String label, String prefix, BuildContext context, TextEditingController controller, Function function)
+{
+  return TextField(
+    onChanged: function,
+    controller: controller,
+    keyboardType: TextInputType.number,
+    decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.amber),
+        enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+                color: Theme.of(context).hintColor)),
+        prefixText: prefix),
+    style:
+    TextStyle(color: Colors.amber, fontSize: 20.0),
+  );
 }
