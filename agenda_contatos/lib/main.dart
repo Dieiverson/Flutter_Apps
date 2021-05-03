@@ -1,15 +1,10 @@
+import 'package:agenda_contatos/ui/contact_page.dart';
+import 'package:agenda_contatos/ui/home_page.dart';
 import 'package:flutter/material.dart';
-void main(){
-  runApp(MaterialApp(home:Home()));
-}
-class Home extends StatefulWidget {
-  @override
-  _HomeState createState() => _HomeState();
+
+void main() {
+  runApp(MaterialApp(
+      home: HomePage(),
+  debugShowCheckedModeBanner: false,));
 }
 
-class _HomeState extends State<Home> {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
